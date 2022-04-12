@@ -2,8 +2,22 @@ import './style.css'
 
 import * as THREE from 'three';
 import * as dat from 'dat.gui';
+import gsap from 'gsap';
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+
+//Testing mouseX position output
+window.addEventListener('mousemove', (event) => {
+  console.log(event.clientX);
+});
+
+//Adding resize feature
+
+window.addEventListener('resize', (event) => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix()
+    renderer.setSize(window.innerWidth, window.innerHeight);
+})
 
 //Debug
 const gui = new dat.GUI();
@@ -31,8 +45,11 @@ const material = new THREE.MeshStandardMaterial({
   color: 0xFF6347,
 });
 const torus = new THREE.Mesh(geometry, material);
-//scene.add(torus);
+torus.position.x = 6;
+torus.position.y = 15;
+scene.add(torus);
 
+camera.lookAt(new THREE.Vector3(200,2,2));
 //Adding Lights
 
 const pointLight = new THREE.PointLight(0xffffff);
@@ -46,12 +63,14 @@ scene.add(pointLight, ambientLight);
 
 const lightHelper = new THREE.PointLightHelper(pointLight);
 const gridHelper = new THREE.GridHelper(200, 50);
+const axesHelper = new THREE.AxesHelper(20);
 
-scene.add(lightHelper, gridHelper);
+scene.add(lightHelper, gridHelper, axesHelper);
 
 //Init Orbit Controls
 
 const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
 
 //Star Experiment 
 
@@ -70,23 +89,45 @@ function addStar() {
 
 Array(200).fill().forEach(addStar);
 
+const clock = new THREE.Clock();
+
 //Call the render method
+
+gsap.to(torus.position, {
+  duration: 2,
+  delay: 1,
+  x: 300
+});
+gsap.to(torus.position, {
+  duration: 2,
+  delay: 3,
+  x: 0
+});
 
 function animate() {
   requestAnimationFrame(animate);
-
+  const elapsedTime = clock.getElapsedTime()
+  
   //Animate properties here
+  
+  torus.rotation.x = elapsedTime*2*Math.PI;
+  torus.rotation.y = elapsedTime;
+  torus.rotation.z = elapsedTime;
 
-  torus.rotation.x += 0.01;
-  torus.rotation.y += 0.005;
-  torus.rotation.z += 0.01;
+  torus.position.y = Math.sin(elapsedTime) * 10;
+  
+  //torus.position.x = Math.cos(elapsedTime) * 10;
+  camera.lookAt(torus.position);
 
   //Update Controls every frame
   
   controls.update();
 
   renderer.render(scene, camera);
+  return elapsedTime;
 }
 
 animate();
+
+
 
