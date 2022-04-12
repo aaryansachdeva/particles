@@ -17,7 +17,34 @@ window.addEventListener('resize', (event) => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix()
     renderer.setSize(window.innerWidth, window.innerHeight);
-})
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+});
+
+window.addEventListener('dblclick', () => {
+
+  const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
+  if(!fullscreenElement) {
+
+    if(renderer.domElement.requestFullscreen) {
+      renderer.domElement.requestFullscreen();
+    }
+
+    else if(renderer.domElement.webkitRequestFullScreen) {
+      renderer.domElement.webkitRequestFullScreen();
+    }
+  }
+  else {
+
+    if(document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+
+    else if(document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+    
+  }
+});
 
 //Debug
 const gui = new dat.GUI();
@@ -31,7 +58,7 @@ const renderer = new THREE.WebGL1Renderer({
 });
 
 //Init render settings
-renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 //Set Camera position
