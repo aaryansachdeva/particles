@@ -5,10 +5,11 @@ import * as dat from 'dat.gui';
 import gsap from 'gsap';
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { color } from 'dat.gui';
 
 //Testing mouseX position output
 window.addEventListener('mousemove', (event) => {
-  console.log(event.clientX);
+  //console.log(event.clientX);
 });
 
 //Adding resize feature
@@ -49,6 +50,15 @@ window.addEventListener('dblclick', () => {
 //Debug
 const gui = new dat.GUI();
 
+const parameters = {
+  color: 0xffffff,
+};
+
+gui
+  .addColor(parameters, "color").onChange(() => {
+    torus.material.color.set(parameters.color);
+  })
+
 //Initialize Scene, Camera and Renderer
 
 const scene = new THREE.Scene();
@@ -63,20 +73,27 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
 //Set Camera position
 
-camera.position.setZ(30);
+camera.position.setZ(20);
+camera.position.setY(30);
+
+gui.add(camera.rotation, 'x', -3.14, 3.14, .1);
+
+console.log('camera.rotation.x: ', camera.rotation.x);
+
 
 //Adding Geometry
 
 const geometry = new THREE.TorusGeometry(10,3,16,100);
 const material = new THREE.MeshStandardMaterial({
-  color: 0xFF6347,
+  color: parameters.color,
+  wireframe: true,
 });
 const torus = new THREE.Mesh(geometry, material);
 torus.position.x = 6;
 torus.position.y = 15;
 scene.add(torus);
 
-camera.lookAt(new THREE.Vector3(200,2,2));
+//camera.lookAt(new THREE.Vector3(200,2,2));
 //Adding Lights
 
 const pointLight = new THREE.PointLight(0xffffff);
@@ -102,6 +119,7 @@ controls.enableDamping = true;
 //Star Experiment 
 
 function addStar() {
+  
   const geometryStar = new THREE.SphereGeometry(0.25, 24, 24);
   const materialStar = new THREE.MeshStandardMaterial({
     color: 0xffffff
@@ -112,14 +130,17 @@ function addStar() {
 
   star.position.set(x, y, z);
   scene.add(star);
+
+  return star;
 }
 
-Array(200).fill().forEach(addStar);
+const arr = Array(200).fill().forEach(addStar)
+
 
 const clock = new THREE.Clock();
 
-//Call the render method
-
+//GSAP
+/*
 gsap.to(torus.position, {
   duration: 2,
   delay: 1,
@@ -130,6 +151,30 @@ gsap.to(torus.position, {
   delay: 3,
   x: 0
 });
+*/
+
+const func = {
+  go: () => {
+    gsap.to(torus.position, {
+      duration: 2,
+      delay: 1,
+      x: 300
+    });
+    gsap.to(torus.position, {
+      duration: 2,
+      delay: 3,
+      x: 0
+    });
+  }
+}
+
+gui.add(func, "go");
+//Call the render method
+
+
+
+
+
 
 function animate() {
   requestAnimationFrame(animate);
@@ -140,13 +185,14 @@ function animate() {
   torus.rotation.x = elapsedTime*2*Math.PI;
   torus.rotation.y = elapsedTime;
   torus.rotation.z = elapsedTime;
-
+  /*
   torus.position.y = Math.sin(elapsedTime) * 10;
   
-  //torus.position.x = Math.cos(elapsedTime) * 10;
+  torus.position.x = Math.cos(elapsedTime) * 10;*/
   camera.lookAt(torus.position);
 
   //Update Controls every frame
+
   
   controls.update();
 
